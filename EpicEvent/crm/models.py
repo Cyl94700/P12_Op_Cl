@@ -7,9 +7,9 @@ from django.conf import settings
 class Client(models.Model):
     """
     Client avec ou sans contrat(s)
-    chaque client est relié à une équipe du groupe de vente.
-    Un utilisateur de l'équipe de vente peut créer des clients potentiels sans contact client, without
-    L'utilisateur de l'équipe de support (superuser) attribue le contact client, ce qui convertit le client potentiel
+    Chaque client est relié à une équipe du groupe de vente.
+    Un utilisateur de l'équipe de vente peut créer des clients potentiels sans contact client.
+    L'utilisateur de l'équipe de management attribue le contact client, ce qui convertit le client potentiel
     en client actif.
     """
 
@@ -18,10 +18,11 @@ class Client(models.Model):
     email = models.EmailField(max_length=100, help_text=_("Email client"))
     phone = models.CharField(max_length=20, help_text=_("Télephone client fixe"), blank=True)
     mobile = models.CharField(max_length=20, help_text=_("Téléphone client mobile"))
-    company_name = models.CharField(max_length=250, help_text=_("Société clinet si professionnel"), blank=True)
+    company_name = models.CharField(max_length=250, help_text=_("Société client si professionnel"), blank=True)
     datetime_created = models.DateTimeField(auto_now_add=True, help_text=_("Date de création client"))
     datetime_updated = models.DateTimeField(auto_now=True, help_text=_("Date de modification client"))
     sales_contact = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True,
+                                      limit_choices_to={"team_id": 2},
                                       help_text=_("Contact vendeur assigné par l'équipe de support"))
 
     class Meta:
@@ -34,6 +35,15 @@ class Client(models.Model):
     @property
     def full_name(self):
         return "{} {} - suivi par {}".format(self.first_name, self.last_name, self.sales_contact)
+
+    @property
+    def has_sales(self):
+        """Return True if event has support
+        """
+        if self.sales_contact is None:
+            return False
+        else:
+            return True
 
 
 class Contract(models.Model):
@@ -50,7 +60,8 @@ class Contract(models.Model):
     payment_due = models.DateField(help_text=_("Date de paiement Format: AAAA-MM-JJ"))
     client = models.ForeignKey(Client, on_delete=models.CASCADE, help_text=_("Client signataire"))
     sales_contact = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-                                      help_text=_("Contact vendeur attribué par l'équipe support"))
+                                      limit_choices_to={"team_id": 2},
+                                      help_text=_("Contact vendeur attribué par l'équipe management"))
 
     class Meta:
         ordering = ['client', '-datetime_created']
@@ -67,7 +78,7 @@ class Contract(models.Model):
 
 class Event(models.Model):
     """Evénement client
-    Chaque événement est lié à un client et un membre de l'équipe support
+    Chaque événement est lié à un client et un membre de l'équipe support attribué par l'équipe de management
     """
     datetime_created = models.DateTimeField(auto_now_add=True, help_text=_("Date création évènement"))
     datetime_updated = models.DateTimeField(auto_now=True, help_text=_("Date de modification événement"))
@@ -80,6 +91,7 @@ class Event(models.Model):
         on_delete=models.CASCADE,
         help_text=_("contact client"))
     support_contact = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True,
+                                        limit_choices_to={"team_id": 3},
                                         blank=True, help_text=_("Contact support"))
     status = models.BooleanField(default=False, help_text=_("Terminé O/N"))
 
