@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -35,6 +36,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,7 +45,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
-    'rest_framework.authtoken',
     'users',
     'crm',
 ]
@@ -78,7 +79,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'EpicEvent.wsgi.application'
 
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+    "DATE_FORMAT": "%d-%m-%Y",
+    "DATETIME_FORMAT": "%d-%m-%Y %H:%M",
+}
 
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=10),
+}
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
@@ -130,7 +141,28 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# Jazzmin configuration
+
+JAZZMIN_SETTINGS = {
+    "site_title": "EpicEvents Admin",
+    "site_brand": "EpicEvents",
+    "site_logo": "img/logo.png",
+    "welcome_sign": "Welcome to the EpicEvents Admin site",
+    "topmenu_links": [
+        {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"app": "users"},
+        {"app": "crm"},
+    ],
+    "icons": {
+        "users.user": "fas fa-users",
+        "clients.client": "fas fa-address-book",
+        "contracts.contract": "fas fa-file-signature",
+        "events.event": "far fa-calendar",
+    },
+    "changeform_format": "single",
+}
