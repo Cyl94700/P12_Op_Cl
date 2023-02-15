@@ -23,7 +23,7 @@ class Client(models.Model):
     datetime_updated = models.DateTimeField(auto_now=True, help_text=_("Date de modification client"))
     sales_contact = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True,
                                       limit_choices_to={"team_id": 2},
-                                      help_text=_("Contact vendeur assigné par l'équipe de support"))
+                                      help_text=_("Contact vendeur assigné par l'équipe management"))
 
     class Meta:
         ordering = ['last_name', 'first_name']

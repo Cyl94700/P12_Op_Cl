@@ -1,10 +1,12 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from django.urls import path
 
 
-client_router = DefaultRouter()
+from .views import ClientList, ClientDetail
 
+
+app_name = "crm"
 
 urlpatterns = [
-    path('', include(client_router.urls)),
+    path("", ClientList.as_view(), name="list"),
+    path("<int:pk>/", ClientDetail.as_view(), name="detail"),
 ]
