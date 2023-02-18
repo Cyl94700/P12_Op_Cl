@@ -59,7 +59,7 @@ class Contract(models.Model):
     amount = models.DecimalField(max_digits=9, decimal_places=2, help_text=_("Montant du contrat"))
     payment_due = models.DateField(help_text=_("Date de paiement Format: AAAA-MM-JJ"))
     client = models.ForeignKey(Client, on_delete=models.CASCADE, help_text=_("Client signataire"))
-    sales_contact = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+    sales_contact = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,null=True, blank=True,
                                       limit_choices_to={"team_id": 2},
                                       help_text=_("Contact vendeur attribué par l'équipe management"))
 

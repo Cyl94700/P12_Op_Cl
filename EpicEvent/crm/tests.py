@@ -1,6 +1,6 @@
 import pytest
 from rest_framework.test import APIClient
-from .models import Client
+from .models import Client, Contract
 # from users.models import User, Team
 from users.models import Team, User
 
@@ -131,12 +131,20 @@ def client3(db, seller2):
                                  mobile="06 07 07 07 07",
                                  sales_contact=seller2)
 
+
+@pytest.fixture
+def contract1(db, seller1, client1):
+    return Contract.objects.create(amount='10250.50',
+                                   payment_due="2022-01-20",
+                                   client=client1,
+                                   sales_contact=seller1)
+
 # ############################################################################
 # ###########################  -Tests CLIENTS-  ##############################
 # ############################################################################
 
 
-def test_get_client_list_for_sale_team_seller1(client, seller1_login, client1, client2, client3):
+def test_get_client_list_seller1(client, seller1_login, client1, client2, client3):
     client.credentials(HTTP_AUTHORIZATION='Bearer ' + seller1_login)
     response = client.get('/crm/clients/')
     assert response.status_code == 200
@@ -145,7 +153,7 @@ def test_get_client_list_for_sale_team_seller1(client, seller1_login, client1, c
     assert b'Vincent' not in response.content
 
 
-def test_not_get_client_list_for_sale_team_seller2(client, seller2_login, client1, client2, client3):
+def test_not_get_client_list_seller1_for_seller2(client, seller2_login, client1, client2, client3):
     client.credentials(HTTP_AUTHORIZATION='Bearer ' + seller2_login)
     response = client.get('/crm/clients/')
     assert response.status_code == 200
@@ -154,7 +162,7 @@ def test_not_get_client_list_for_sale_team_seller2(client, seller2_login, client
     assert b'Jean' not in response.content
 
 
-def test_not_get_client_list_for_sale_team_supporter1(client, supporter1_login, client1, client2, client3):
+def test_not_get_client_list_sale_team_for_supporter1(client, supporter1_login, contract1, client1, client2, client3):
     client.credentials(HTTP_AUTHORIZATION='Bearer ' + supporter1_login)
     response = client.get('/crm/clients/')
     assert response.status_code == 403
@@ -163,7 +171,7 @@ def test_not_get_client_list_for_sale_team_supporter1(client, supporter1_login, 
     assert b'Jean' not in response.content
 
 
-def test_not_get_client_list_for_sale_team_manager1(client, manager1_login, client1, client2, client3):
+def test_get_client_list_sale_team_for_manager1(client, manager1_login, client1, client2, client3):
     client.credentials(HTTP_AUTHORIZATION='Bearer ' + manager1_login)
     response = client.get('/crm/clients/')
     assert response.status_code == 200
@@ -172,7 +180,7 @@ def test_not_get_client_list_for_sale_team_manager1(client, manager1_login, clie
     assert b'Jean' in response.content
 
 
-def test_view_client_detail(client, seller1_login, client1):
+def test_view_client_detail_for_seller1(client, seller1_login, client1):
     client.credentials(HTTP_AUTHORIZATION='Bearer ' + seller1_login)
 
     response = client.get('/crm/clients/' + str(client1.id) + '/')
@@ -199,7 +207,7 @@ def test_supporter1_can_not_post_new_client(client, supporter1_login):
     assert response.status_code == 403
 
 
-def test_update_client_detail(client, seller1_login, client1):
+def test_update_client_detail_for_seller1(client, seller1_login, client1):
     client.credentials(HTTP_AUTHORIZATION='Bearer ' + seller1_login)
     response = client.put('/crm/clients/' + str(client1.id) + '/',
                           {'first_name': "Jean",
@@ -211,7 +219,66 @@ def test_update_client_detail(client, seller1_login, client1):
     assert response.status_code == 202
 
 
-def test_delete_client(client, seller1_login, client1):
+def test_delete_client_for_seller1(client, seller1_login, client1):
     client.credentials(HTTP_AUTHORIZATION='Bearer ' + seller1_login)
     response = client.delete('/crm/clients/' + str(client1.id) + '/')
     assert response.status_code == 204
+
+
+# ############################################################################
+# ###########################  -Tests CONTRACTS-  ############################
+# ############################################################################
+
+
+def test_get_contracts_list_for_seller1(client, seller1_login, contract1):
+    client.credentials(HTTP_AUTHORIZATION='Bearer ' + seller1_login)
+    response = client.get('/crm/contracts/')
+    assert response.status_code == 200
+
+
+def test_get_contracts_list_for_supporter1(client, supporter1_login, contract1):
+    client.credentials(HTTP_AUTHORIZATION='Bearer ' + supporter1_login)
+    response = client.get('/crm/contracts/')
+    assert response.status_code == 200
+
+
+def test_seller1_can_post_new_contract(client, seller1_login, client1):
+    client.credentials(HTTP_AUTHORIZATION='Bearer ' + seller1_login)
+    response = client.post('/crm/contracts/',
+                           {'status_sign': False,
+                            'amount': '999.99',
+                            'payment_due': "2023-06-15",
+                            'client': client1.id},format='json')
+    assert response.status_code == 201
+
+
+def test_supporter1_not_authorized_to_post_new_contract(client, supporter1_login, client1):
+    client.credentials(HTTP_AUTHORIZATION='Bearer ' + supporter1_login)
+    response = client.post('/crm/contracts/',
+                           {'status_sign': False,
+                            'amount': "100",
+                            'payment_due': "2023-07-20",
+                            'client': client1.id}, format='json')
+    assert response.status_code == 403
+
+
+def test_view_contract_detail_for_seller1(client, seller1_login, contract1):
+    client.credentials(HTTP_AUTHORIZATION='Bearer ' + seller1_login)
+    response = client.get('/crm/contracts/' + str(contract1.id) + '/')
+    assert response.status_code == 200
+
+
+def test_update_contract_not_sign_detail_for_seller1(client, seller1_login, contract1, client1):
+    client.credentials(HTTP_AUTHORIZATION='Bearer ' + seller1_login)
+    response = client.put('/crm/contracts/' + str(contract1.id) + '/',
+                          {'status_sign': False,
+                           'amount': '10250.50',
+                           'payment_due': "2023-08-20",
+                           'client': client1.id}, format='json')
+    assert response.status_code == 202
+
+
+def test_cant_delete_contract(client, seller1_login, contract1):
+    client.credentials(HTTP_AUTHORIZATION='Bearer ' + seller1_login)
+    response = client.delete('/crm/contracts/' + str(contract1.id) + '/')
+    assert response.status_code == 405
