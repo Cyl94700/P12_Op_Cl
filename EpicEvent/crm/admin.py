@@ -21,7 +21,7 @@ class ClientAdmin(admin.ModelAdmin):
         ),
         ("Sales", {"fields": ("sales_contact",)}),
 
-        ("Info", {"fields": ("date_created", "date_updated")}),
+        ("Info", {"fields": ("datetime_created", "datetime_updated")}),
     )
     readonly_fields = ("datetime_created", "datetime_updated")
     list_display = (
@@ -46,7 +46,7 @@ class ContractAdmin(admin.ModelAdmin):
     fieldsets = (
         ("Contract Info", {"fields": ("client", "amount", "payment_due")}),
         ("Sales", {"fields": ("status_sign", "sales_contact")}),
-        ("Info", {"fields": ("date_created", "date_updated")}),
+        ("Info", {"fields": ("datetime_created", "datetime_updated")}),
     )
     readonly_fields = ("datetime_created", "datetime_updated")
     list_display = (
@@ -79,7 +79,7 @@ class EventAdmin(admin.ModelAdmin):
             },
         ),
         ("Support", {"fields": ("support_contact", "notes")}),
-        ("Info", {"fields": ("date_created", "date_updated")}),
+        ("Info", {"fields": ("datetime_created", "datetime_updated")}),
     )
     readonly_fields = ("datetime_created", "datetime_updated")
     list_display = (
