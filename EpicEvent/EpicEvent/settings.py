@@ -102,7 +102,7 @@ DATABASES = {
         'PASSWORD': 'pwd123',
         'HOST': 'localhost',
         'PORT': '5432',
-    }
+    },
 }
 
 # Password validation

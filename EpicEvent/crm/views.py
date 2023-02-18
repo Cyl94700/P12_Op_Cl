@@ -23,9 +23,9 @@ class ClientList(generics.ListCreateAPIView):
                 contract__event__support_contact=self.request.user
             ).distinct()
         elif self.request.user.team.name == SALES:
-            all_clients = Client.objects.filter(sales_contact="")
+            null_clients = Client.objects.filter(sales_contact__isnull=True)
             own_clients = Client.objects.filter(sales_contact=self.request.user)
-            return all_clients | own_clients
+            return null_clients | own_clients
         return Client.objects.all()
 
     def post(self, request, *args, **kwargs):
