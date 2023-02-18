@@ -4,7 +4,7 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('users.urls')),
-    path('crm/clients/', include('crm.urls')),
+    path('crm/', include('crm.urls')),
 
 ]
 admin.site.site_header = "EpicEvents Admin"
