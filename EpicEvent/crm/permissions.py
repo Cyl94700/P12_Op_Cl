@@ -59,6 +59,33 @@ class ContractPermissions(permissions.BasePermission):
         return request.user == obj.sales_contact and obj.status_sign is False
 
 
+class EventPermissions(permissions.BasePermission):
+    """
+    Sales team :
+    Un vendeur voit et modifie ses propres événements tant qu'ils ne sont pas terminés
+    Support team :
+    Visulalise et modifie ses propres événements tant qu'ils ne sont pas terminés.
+    """
+
+    def has_permission(self, request, view):
+        if request.user.team.name == SUPPORT:
+            return request.method in ["GET", "PUT"]
+        return request.user.team.name == SALES
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return (
+                request.user == obj.support_contact
+                or request.user == obj.contract.sales_contact
+            )
+        else:
+            if obj.event_status is True:
+                raise PermissionDenied("Not permited to update a finished event.")
+            if request.user.team.name == SUPPORT:
+                return request.user == obj.support_contact
+            return request.user == obj.contract.sales_contact
+
+
 class IsManager(permissions.BasePermission):
     """
     Managers :
