@@ -84,9 +84,9 @@ class Event(models.Model):
     Evénement client
     Chaque événement est lié à un client et un membre de l'équipe support attribué par l'équipe de management
     """
-    contract = models.OneToOneField(to=Contract, on_delete=models.CASCADE, limit_choices_to={"status": True},
+    contract = models.OneToOneField(to=Contract, on_delete=models.CASCADE, limit_choices_to={"status_sign": True},
                                     related_name="event")
-    name = models.CharField(max_length=100, help_text=_("Nom"))
+    name = models.CharField(max_length=100, help_text=_("Nom"), null=True, blank=True,)
 
     attendees = models.IntegerField(validators=[MinValueValidator(0)], null=True, blank=True,
                                     help_text=_("Nombre d'invités"))

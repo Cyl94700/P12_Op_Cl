@@ -15,13 +15,12 @@ class ClientList(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated, IsManager | ClientPermissions]
     filter_backends = [SearchFilter, DjangoFilterBackend]
     search_fields = ["last_name", "email", "company_name"]
-    # filterset_fields = ["last_name", "email", "company_name"]
     filterset_fields = ["sales_contact"]
 
     def get_queryset(self):
         if self.request.user.team.name == SUPPORT:
             return Client.objects.filter(
-                contract__event__support_contact=self.request.user
+                contract__events__support_contact=self.request.user
             ).distinct()
         elif self.request.user.team.name == SALES:
             null_clients = Client.objects.filter(sales_contact__isnull=True)
@@ -103,13 +102,11 @@ class EventList(generics.ListCreateAPIView):
         "contract__client__last_name",
         "contract__client__email",
         "contract__client__company_name",
-        "name",
-        "location",
     ]
     filterset_fields = {
         "event_date": ["gte", "lte"],
         "attendees": ["gte", "lte"],
-        "event_status": ["exact"],
+        "status": ["exact"],
     }
 
     def get_queryset(self):
@@ -136,8 +133,12 @@ class EventDetail(generics.RetrieveUpdateAPIView):
         event = self.get_object()
         serializer = EventSerializer(instance=event, data=request.data)
         if serializer.is_valid(raise_exception=True):
+            if "support_contact" not in serializer.validated_data:
+                print(serializer.errors)
+                print(serializer.validated_data)
+                raise ValidationError({"detail": "support_contact is missing"})
             if serializer.validated_data["contract"] != event.contract:
-                raise ValidationError({"detail": "Cannot change the related contract."})
+                raise ValidationError({"detail": "Not permited to change the related contract."})
             serializer.validated_data["support_contact"] = event.support_contact
             serializer.save()
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)

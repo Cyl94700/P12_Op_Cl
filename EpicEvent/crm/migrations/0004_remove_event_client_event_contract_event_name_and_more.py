@@ -29,4 +29,21 @@ class Migration(migrations.Migration):
             name='support_contact',
             field=models.ForeignKey(blank=True, help_text='Contact support', limit_choices_to={'team_id': 3}, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='events', to=settings.AUTH_USER_MODEL),
         ),
+        migrations.RemoveField(
+            model_name='event',
+            name='client',
+        ),
+        migrations.AddField(
+            model_name='event',
+            name='contract',
+            field=models.OneToOneField(default=None, limit_choices_to={'status': True},
+                                       on_delete=django.db.models.deletion.CASCADE, related_name='event',
+                                       to='crm.contract'),
+            preserve_default=False,
+        ),
+        migrations.AddField(
+            model_name='event',
+            name='name',
+            field=models.CharField(blank=True, help_text='Nom', max_length=100, null=True),
+        ),
     ]

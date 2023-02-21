@@ -74,12 +74,10 @@ class EventPermissions(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
-            return (
-                request.user == obj.support_contact
-                or request.user == obj.contract.sales_contact
-            )
+            return (request.user == obj.support_contact
+                    or request.user == obj.contract.sales_contact)
         else:
-            if obj.event_status is True:
+            if obj.status is True:
                 raise PermissionDenied("Not permited to update a finished event.")
             if request.user.team.name == SUPPORT:
                 return request.user == obj.support_contact
