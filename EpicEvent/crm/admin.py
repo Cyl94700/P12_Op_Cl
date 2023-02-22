@@ -68,35 +68,17 @@ class ContractAdmin(admin.ModelAdmin):
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     fieldsets = (
-        (
-            "Event Info",
-            {
-                "fields": (
-                    "attendees",
-                    "event_date",
-                    "status",
-                )
-            },
-        ),
+        ("Event Info", {"fields": ("contract", "name", "attendees", "event_date", "status")}),
         ("Support", {"fields": ("support_contact", "notes")}),
         ("Info", {"fields": ("datetime_created", "datetime_updated")}),
     )
     readonly_fields = ("datetime_created", "datetime_updated")
     list_display = (
-        "support_contact",
+        "contract",
+        "name",
         "attendees",
         "event_date",
         "status",
-    )
+        "support_contact")
     list_filter = ("status", "support_contact")
-    search_fields = ("name", "location", "client__last_name")
-
-
-"""from django.contrib import admin
-
-from .models import Client, Contract, Event
-
-admin.site.register(Client)
-admin.site.register(Contract)
-admin.site.register(Event)
-"""
+    search_fields = ("name", "client__last_name")

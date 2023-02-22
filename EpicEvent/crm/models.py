@@ -71,12 +71,15 @@ class Contract(models.Model):
         verbose_name_plural = _("Contrats")
 
     def __str__(self):
-        return "Contracté pour {} - {} $".format(self.client, self.amount)
+        if self.status_sign is False:
+            sign = "Non signé"
+        else:
+            sign = "Signé"
+        return "N° {}  {} - {} ".format(self.id, self.client, sign)
 
     @property
     def description(self):
-        return "Contracté pour {} - suivi par {}".format(self.client,
-                                                         self.sales_contact)
+        return "N° {}  {} - suivi par {}".format(self.id, self.client, self.sales_contact)
 
 
 class Event(models.Model):
@@ -106,13 +109,13 @@ class Event(models.Model):
         verbose_name_plural = _("Evènements")
 
     def __str__(self):
-        return "Evènement commandé par {} - suivi par {}".format(
-            self.contract.primary_key, self.support_contact)
+        return "Evènement {} - suivi par {}".format(
+            self.contract, self.support_contact)
 
     @property
     def description(self):
-        return "Evènement commandé par {} - {} ".format(
-            self.contract.primary_key, self.status)
+        return "Evènement {} - {} ".format(
+            self.contract, self.status)
 
     @property
     def has_support(self):
