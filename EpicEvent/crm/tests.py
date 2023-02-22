@@ -134,9 +134,18 @@ def client3(db, seller2):
 
 @pytest.fixture
 def contract1(db, seller1, client1):
-    return Contract.objects.create(# status_sign=False,
+    return Contract.objects.create(status_sign=False,
                                    amount='10250.50',
-                                   payment_due="2022-01-20",
+                                   payment_due="2023-01-20",
+                                   client=client1,
+                                   sales_contact=seller1)
+
+
+@pytest.fixture
+def contract2(db, seller1, client1):
+    return Contract.objects.create(status_sign=True,
+                                   amount='999.50',
+                                   payment_due="2023-02-20",
                                    client=client1,
                                    sales_contact=seller1)
 
@@ -144,9 +153,17 @@ def contract1(db, seller1, client1):
 @pytest.fixture
 def event1(db, supporter1, contract1, seller1):
     return Event.objects.create(contract=contract1,
+                                name='Feu d\'articices',
+                                attendees="1200",
+                                support_contact=supporter1)
+
+
+@pytest.fixture
+def event2(db, supporter1, contract2, seller1):
+    return Event.objects.create(contract=contract2,
+                                name='Repas annuel des retraités',
                                 attendees="200",
                                 support_contact=supporter1)
-                                # status=False)
 
 
 # ############################################################################
@@ -171,13 +188,13 @@ def test_not_get_client_list_seller1_for_seller2(client, seller2_login, client1,
     assert b'Jean' not in response.content
 
 
-def test_not_get_client_list_seller1_without_contract_for_supporter1(client, supporter1_login, contract1, client1,
-                                                                     client2, client3, event1):
+def test_get_client_list_seller1_with_contract_for_supporter1(client, supporter1_login, client1, contract1,
+                                                              client2, client3, event1):
     client.credentials(HTTP_AUTHORIZATION='Bearer ' + supporter1_login)
     response = client.get('/crm/clients/')
     assert response.status_code == 200
     assert b'Fabienne' not in response.content
-    assert b'Jean' not in response.content
+    assert b'Jean' in response.content
 
 
 def test_get_client_list_sale_team_for_manager1(client, manager1_login, client1, client2, client3):
@@ -251,23 +268,23 @@ def test_get_contracts_list_for_supporter1(client, supporter1_login, contract1):
     assert response.status_code == 200
 
 
-def test_seller1_can_post_new_contract(client, seller1_login, client1):
+def test_seller1_can_post_new_contract(client, seller1_login, client2):
     client.credentials(HTTP_AUTHORIZATION='Bearer ' + seller1_login)
     response = client.post('/crm/contracts/',
-                           {# 'status_sign': False,
-                            'amount': '999.99',
+                           {'amount': '999.99',
                             'payment_due': "2023-06-15",
-                            'client': client1.id},format='json')
+                            'client': client2.id}, format='json')
+
     assert response.status_code == 201
 
 
 def test_supporter1_not_authorized_to_post_new_contract(client, supporter1_login, client1):
     client.credentials(HTTP_AUTHORIZATION='Bearer ' + supporter1_login)
     response = client.post('/crm/contracts/',
-                           {# 'status_sign': False,
-                            'amount': "100",
+                           {'amount': "100",
                             'payment_due': "2023-07-20",
                             'client': client1.id}, format='json')
+
     assert response.status_code == 403
 
 
@@ -280,14 +297,14 @@ def test_view_contract_detail_for_seller1(client, seller1_login, contract1):
 def test_update_contract_not_sign_detail_for_seller1(client, seller1_login, contract1, client1):
     client.credentials(HTTP_AUTHORIZATION='Bearer ' + seller1_login)
     response = client.put('/crm/contracts/' + str(contract1.id) + '/',
-                          {#'status_sign': True,
+                          {'status_sign': True,
                            'amount': '10250.50',
                            'payment_due': "2023-08-20",
                            'client': client1.id}, format='json')
     assert response.status_code == 202
 
 
-def test_cant_delete_contract(client, seller1_login, contract1):
+def test_cant_delete_contract_signed(client, seller1_login, contract1):
     client.credentials(HTTP_AUTHORIZATION='Bearer ' + seller1_login)
     response = client.delete('/crm/contracts/' + str(contract1.id) + '/')
     assert response.status_code == 405
@@ -295,6 +312,10 @@ def test_cant_delete_contract(client, seller1_login, contract1):
 # ############################################################################
 # #############################  -Tests EVENTS-  #############################
 # ############################################################################
+
+
+def update_event1(supporter1):
+    Event.objects.filter(pk=event1.pk).update(support_contact=supporter1)
 
 
 def test_get_events_list_for_seller1(client, seller1_login, event1, contract1):
@@ -309,26 +330,23 @@ def test_get_events_list_for_supporter1(client, supporter1_login, event1, contra
     assert response.status_code == 200
 
 
-def test_seller1_can_post_new_event(client, seller1_login, client1, contract1):
+def test_seller1_can_post_new_event(client, seller1_login, client1, contract2):
     client.credentials(HTTP_AUTHORIZATION='Bearer ' + seller1_login)
     response = client.post('/crm/events/',
-                           {'contract': contract1.id,
+                           {'contract': contract2.id,
                             'attendees': '160',
                             'event_date': "2022-02-12",
-                            'notes': "Mon événement",
-                            'status': False,
-                            'client': client1.id}, format='json')
-    print(response)
+                            'notes': "Mon événement"}, format='json')
     assert response.status_code == 201
 
 
-def test_supporter1_not_authorized_to_post_new_event(client, supporter1_login, client1):
+def test_supporter1_not_authorized_to_post_new_event(client, supporter1_login, contract2, client1):
     client.credentials(HTTP_AUTHORIZATION='Bearer ' + supporter1_login)
     response = client.post('/crm/events/',
-                           {'attendees': '160',
+                           {'contract': contract2.id,
+                            'attendees': '160',
                             'event_date': "2022-02-12",
-                            'notes': 'event test',
-                            'client': client1.id}, format='json')
+                            'notes': 'Mon événement'}, format='json')
     assert response.status_code == 403
 
 
@@ -338,19 +356,20 @@ def test_seller1_can_view_event_detail(client, seller1_login, event1):
     assert response.status_code == 200
 
 
-def test_supporter1_can_view_event_detail(client, supporter1_login, event1):
+def test_supporter1_can_view_event_detail(client, supporter1_login, event1, contract1):
     client.credentials(HTTP_AUTHORIZATION='Bearer ' + supporter1_login)
     response = client.get('/crm/events/' + str(event1.id) + '/')
     assert response.status_code == 200
 
 
-def test_supporter1_can_update_event_detail(client, supporter1_login, event1, client1, contract1):
+def test_supporter1_can_update_event_detail(client, supporter1_login, event2, client1, contract2):
     client.credentials(HTTP_AUTHORIZATION='Bearer ' + supporter1_login)
-    response = client.put('/crm/events/' + str(event1.id) + '/',
-                          {'attendees': 200,
-                           'status': True,
+    response = client.put('/crm/events/' + str(event2.id) + '/',
+                          {'contract': contract2.id,
+                           'attendees': 2200,
+                           'name': "Feu d'\artifices modifié",
                            'client': client1.id}, format='json')
-    assert response.status_code == 200
+    assert response.status_code == 202
 
 
 def test_supporter1_cant_delete_event(client, supporter1_login, event1):
