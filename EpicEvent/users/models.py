@@ -11,7 +11,8 @@ TEAM_LIMIT = 3
 
 class Team(models.Model):
 
-    name = models.CharField(max_length=10, choices=((MANAGEMENT, "Management"), (SALES, "Sales"), (SUPPORT, "Support")))
+    name = models.CharField(max_length=10,
+                            choices=((MANAGEMENT, "Management"), (SALES, "Sales"), (SUPPORT, "Support")))
     objects = models.Manager()
 
     def __str__(self):
