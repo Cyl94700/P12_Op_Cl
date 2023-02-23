@@ -6,3 +6,6 @@ env/
 
 # PyCharm
 .idea/
+# Coverage
+.coverage
+.coveragerc
