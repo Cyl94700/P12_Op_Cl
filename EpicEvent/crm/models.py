@@ -72,9 +72,9 @@ class Contract(models.Model):
 
     def __str__(self):
         if self.status_sign is False:
-            sign = "Non signé"
+            sign = 'Non signé'
         else:
-            sign = "Signé"
+            sign = 'Signé'
         return "N° {}  {} - {} ".format(self.id, self.client, sign)
 
     @property
@@ -114,8 +114,11 @@ class Event(models.Model):
 
     @property
     def description(self):
-        return "Evènement {} - {} ".format(
-            self.contract, self.status)
+        if self.status is False:
+            completed = 'Non terminé'
+        else:
+            completed = 'Terminé'
+        return "Evènement {} - {} ".format(self.contract, completed)
 
     @property
     def has_support(self):

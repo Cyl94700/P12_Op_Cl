@@ -17,16 +17,6 @@ class Team(models.Model):
     def __str__(self):
         return self.name
 
-    """
-    def save(self, *args, **kwargs):
-        
-        # Prevent from creating new teams or editing existing teams.
-        if Team.objects.all().count() <= TEAM_LIMIT or self.pk is not None:
-            raise PermissionDenied(
-                detail="You are not permitted to create or edit teams."
-            )
-    """
-
     def delete(self, using=None, keep_parents=False):
         # Prevent from deleting teams.
         raise PermissionDenied(detail="You are not permitted to delete teams.")

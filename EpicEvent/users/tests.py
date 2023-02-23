@@ -1,5 +1,6 @@
 import pytest
 from django.test import Client
+from rest_framework.exceptions import PermissionDenied
 
 from .models import User, Team, MANAGEMENT, SALES, SUPPORT
 
@@ -56,9 +57,20 @@ def supporter_user(db, support_team):
     supporter.save()
     return supporter
 
+# ################################################################# #
+# ###################       -TEST STR-     ######################## #
 
+
+def test_str_team(sales_team):
+    assert str(sales_team) == "SALES"
+
+
+def test_delete_team(sales_team):
+    with pytest.raises(PermissionDenied):
+        sales_team.delete()
 # ################################################################# #
 # ################## TEST connexion admin panel ################### #
+
 
 def test_manager_user_on_admin(db, client, manager_user, management_team):
     client.login(username=manager_user.username, password='pwd12345')

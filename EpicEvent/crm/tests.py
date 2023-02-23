@@ -165,6 +165,33 @@ def event2(db, supporter1, contract2, seller1):
                                 attendees="200",
                                 support_contact=supporter1)
 
+# ############################################################# #
+# #############  TEST STR and @property models   ############## #
+
+
+def test_full_name(client1: Client):
+    assert client1.full_name == "Jean Martin - suivi par seller1 (SALES)"
+
+
+def test_str_contract(contract1: Contract):
+    assert str(contract1) == "N° 1  Jean Martin - Non signé "
+
+
+def test_description_contract(contract1: Contract):
+    assert contract1.description in "N° 2  Jean Martin - suivi par seller1 (SALES)"
+
+
+def test_event(event1: Event):
+    assert str(event1) in "Evènement N° 3  Jean Martin - Non signé  - suivi par supporter1 (SUPPORT)"
+
+
+def test_description_event(event1: Event):
+    assert event1.description in "Evènement N° 4  Jean Martin - Non signé  - Non terminé "
+
+
+def test_event_has_support(event1: Event):
+    assert event1.has_support is True
+
 
 # ############################################################################
 # ###########################  -Tests CLIENTS-  ##############################
