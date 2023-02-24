@@ -21,9 +21,9 @@ class ClientPermissions(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         if request.method == "DELETE":
-            return request.user.team.name == SALES
+            return request.user.team.name == SALES and request.user == obj.sales_contact
         elif request.method == "PUT":
-            return request.user.team.name == SALES
+            return request.user.team.name == SALES and request.user == obj.sales_contact
         elif (
             request.user.team.name == SUPPORT
             and request.method in permissions.SAFE_METHODS
