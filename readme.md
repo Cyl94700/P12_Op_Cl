@@ -33,17 +33,17 @@ Elaborée pour l'entreprise EpicEvents. Elle permet aux utilisateurs de travaill
 Il existe trois équipes (MANAGER, SALES et SUPPORT) qui déterminent les droits d'accès des utilisateurs.  
 La base de données est gérée avec Django ORM et PostgreSQL. <br>  
  
-<p style="margin-left: 85px;"><strong>Sommaire</strong></p>
-<p align="center" style="font-size: 1.2em;">
-  <a href="#heading--1" style="text-align:left; display:block; margin-left:15px;">1. Configuration et lancement</a>
-  <a href="#heading--1-1" style="text-align:left; display:block; margin-left:30px;">1.1. Récupération locale de l'API</a>
-  <a href="#heading--1-2" style="text-align:left; display:block; margin-left:30px;">1.2. Installation de la base de données</a>
-  <a href="#heading--1-3" style="text-align:left; display:block; margin-left:30px;">1.3. Démarrage</a>
-  <a href="#heading--2" style="text-align:left; display:block; margin-left:15px;">2. Tests</a>
-  <a href="#heading--2-1" style="text-align:left; display:block; margin-left:30px;">2.1. Lancement des tests</a>
-  <a href="#heading--2-2" style="text-align:left; display:block; margin-left:30px;">2.2. Présentation des rapports</a>
-</p>
 
+## Sommaire
+
+**[1. Configuration et lancement](#heading--1)**
+  * [1.1. Récupération locale de l'API](#heading--1-1)
+  * [1.2. Installation de la base de données](#heading--1-2)
+  * [1.3. Démarrage](#heading--1-3)
+
+**[2. Tests](#heading--2)**
+  * [2.1 Lancement des tests](#heading--2-1)
+  * [2.2 Présentation des rapports](#heading--2-2)
        
 
 <div id="heading--1"/>
